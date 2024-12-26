@@ -1,9 +1,10 @@
-import { Recipe } from "../../domain/entities/recipe";
-import { Ingredient } from "../../domain/entities/ingredient";
-import { Step } from "../../domain/entities/step";
-import { Duration } from "../../domain/value-objects/duration";
 import { z } from "zod";
-import { sourceRecipeSchema } from "../../presentation/schemas/source-recipe.schema";
+
+import { Recipe } from "@/domain/entities/recipe";
+import { Ingredient } from "@/domain/entities/ingredient";
+import { Step } from "@/domain/entities/step";
+import { Duration } from "@/domain/value-objects/duration";
+import { sourceRecipeSchema } from "@/presentation/schemas/source-recipe.schema";
 
 export class SourceRecipeAdapter {
   static toDomain(sourceData: z.infer<typeof sourceRecipeSchema>): Recipe {

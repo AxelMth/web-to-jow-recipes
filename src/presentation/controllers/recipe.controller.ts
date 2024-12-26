@@ -1,6 +1,5 @@
-// src/presentation/controllers/RecipeController.ts
 import { Request, Response } from 'express';
-import { RecipeCrawlerUseCase } from '@/application/ports/input/RecipeCrawlerUseCase';
+import { RecipeCrawlerUseCase } from '@/application/ports/input/recipe-crawler.use-case';
 
 export class RecipeController {
   constructor(private readonly recipeCrawlerUseCase: RecipeCrawlerUseCase) {}
@@ -11,7 +10,9 @@ export class RecipeController {
       await this.recipeCrawlerUseCase.crawlAndTransform(Number(page));
       res.status(200).json({ message: 'Recipes crawled successfully' });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      if (error instanceof Error) {
+        res.status(500).json({ error: error.message });
+      }
     }
   }
 }

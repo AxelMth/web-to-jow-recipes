@@ -1,7 +1,6 @@
-// src/application/services/RecipeCrawlerService.ts
-import { RecipeCrawlerUseCase } from '@/application/ports/input/RecipeCrawlerUseCase';
-import { RecipeSourceRepository } from '@/application/ports/output/RecipeSourceRepository';
-import { RecipeTargetRepository } from '@/application/ports/output/RecipeTargetRepository';
+import { RecipeCrawlerUseCase } from '@/application/ports/input/recipe-crawler.use-case';
+import { RecipeSourceRepository } from '@/application/ports/output/recipe-source.repository';
+import { RecipeTargetRepository } from '@/application/ports/output/recipe-target.repository';
 
 export class RecipeCrawlerService implements RecipeCrawlerUseCase {
   constructor(

@@ -1,4 +1,3 @@
-// src/presentation/schemas/source-recipe.schema.ts
 import { z } from 'zod';
 
 export const sourceRecipeSchema = z.object({
@@ -15,6 +14,8 @@ export const sourceRecipeSchema = z.object({
   })),
   prepTime: z.string(),
   totalTime: z.string(),
+  imageUrl: z.string().optional(),
+  servingSize: z.number().optional(),
 });
 
 export type SourceRecipe = z.infer<typeof sourceRecipeSchema>;

@@ -1,6 +1,5 @@
-// src/infrastructure/repositories/HttpSourceRecipeRepository.ts
-import { Recipe } from '@/domain/entities/Recipe';
-import { RecipeSourceRepository } from '@/application/ports/output/RecipeSourceRepository';
+import { Recipe } from '@/domain/entities/recipe';
+import { RecipeSourceRepository } from '@/application/ports/output/recipe-source.repository';
 import { sourceRecipeSchema } from '@/presentation/schemas/source-recipe.schema';
 import { axiosInstance } from '../http/axios-instance';
 import { Duration } from '../../domain/value-objects/duration';
@@ -21,6 +20,6 @@ export class HttpSourceRecipeRepository implements RecipeSourceRepository {
   }
 
   private parseDuration(duration: string): Duration {
-    // Implementation for parsing PT format durations
+    return Duration.fromPTFormat(duration);
   }
 }

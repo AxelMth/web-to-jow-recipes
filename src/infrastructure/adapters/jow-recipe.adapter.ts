@@ -1,6 +1,7 @@
-import { Recipe } from "../../domain/entities/recipe";
 import { z } from "zod";
-import { jowRecipeSchema } from "../../presentation/schemas/jow-recipe.schema";
+
+import { Recipe } from "@/domain/entities/recipe";
+import { jowRecipeSchema } from "@/presentation/schemas/jow-recipe.schema";
 
 export class JowRecipeAdapter {
   static toJow(recipe: Recipe): z.infer<typeof jowRecipeSchema> {
