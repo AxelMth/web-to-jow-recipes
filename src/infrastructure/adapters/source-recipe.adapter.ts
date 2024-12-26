@@ -15,17 +15,15 @@ export class SourceRecipeAdapter {
         ing.id,
         ing.name,
         ing.imageLink,
-        ing.unit,
-        ing.amount,
+        sourceData.yields[0].ingredients.find(yieldIng => yieldIng.id === ing.id)?.unit || '',
+        sourceData.yields[0].ingredients.find(yieldIng => yieldIng.id === ing.id)?.amount || 0,
       )),
       sourceData.steps.map(step => new Step(
-        step.text,
-        step.imageUrl
+        step.instructions,
       )),
       Duration.fromPTFormat(sourceData.prepTime),
       Duration.fromPTFormat(sourceData.totalTime),
-      sourceData.imageUrl,
-      sourceData.servingSize
     );
   }
+
 }

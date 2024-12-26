@@ -10,6 +10,7 @@ export class RecipeController {
       await this.recipeCrawlerUseCase.crawlAndTransform(Number(page));
       res.status(200).json({ message: 'Recipes crawled successfully' });
     } catch (error) {
+      console.error(JSON.stringify(error, null, 2));
       if (error instanceof Error) {
         res.status(500).json({ error: error.message });
       }
