@@ -7,6 +7,8 @@ export const sourceRecipeSchema = z.object({
     id: z.string(),
     name: z.string(),
     imageLink: z.string(),
+    amount: z.number(),
+    unit: z.string(),
   })),
   steps: z.array(z.object({
     text: z.string(),

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { RecipeCrawlerUseCase } from '@/application/ports/input/recipe-crawler.use-case';
+import { RecipeCrawlerUseCase } from '../../application/ports/input/recipe-crawler.use-case'; 
 
 export class RecipeController {
   constructor(private readonly recipeCrawlerUseCase: RecipeCrawlerUseCase) {}
