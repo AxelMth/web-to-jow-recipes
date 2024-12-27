@@ -25,7 +25,7 @@ export class HttpJowIngredientRepository implements IngredientRepository {
     const matchingUnit = ingredient.displayableUnits.find(du => du.label === jowUnitLabel);
     
     if (!matchingUnit) {
-      console.warn(`No matching unit found for ${unit.name} in ingredient ${ingredient.name}`);
+      console.warn(`[${ingredient.name}] No matching unit found for ${unit.name} in ingredient ${ingredient.name}`);
       return null;
     }
 
@@ -34,15 +34,10 @@ export class HttpJowIngredientRepository implements IngredientRepository {
       abbr => abbr.label === jowUnitLabel
     );
 
-    if (!abbreviation) {
-      console.warn(`No matching abbreviation found for ${jowUnitLabel}`);
-      return null;
-    }
-
     const newUnit = new Unit(
       matchingUnit.unit._id,
       matchingUnit.unit.name,
-      abbreviation.divisor
+      abbreviation?.divisor || 1
     );
 
     return new Ingredient(
