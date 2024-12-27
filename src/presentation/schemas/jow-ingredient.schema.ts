@@ -7,7 +7,7 @@ const measurementSystemSchema = z.object({
 });
 
 const abbreviationSchema = z.object({
-  label: z.string(),
+  label: z.string().or(z.null()),
   digits: z.number(),
   divisor: z.number(),
   inverse: z.boolean(),
@@ -44,7 +44,7 @@ const displayableUnitSchema = z.object({
   unit: unitSchema,
 });
 
-const ingredientSchema = z.object({
+export const ingredientSchema = z.object({
   id: z.string(),
   _id: z.string(),
   name: z.string(),
@@ -57,9 +57,4 @@ const ingredientSchema = z.object({
   scores: z.array(z.number()),
   boldName: z.string().optional(),
   boldKeywords: z.string().optional(),
-});
-
-export const jowIngredientResponseSchema = z.object({
-  meta: z.object({}),
-  data: z.array(ingredientSchema),
 });

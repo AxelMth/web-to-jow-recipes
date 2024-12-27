@@ -1,26 +1,27 @@
+import axios from 'axios';
+
 import { Ingredient } from "../../domain/entities/ingredient";
 import { Unit } from "../../domain/entities/unit";
 import { IngredientRepository } from "../../application/ports/output/ingredient.repository";
-import { axiosInstance } from "../http/axios-instance";
-import { jowIngredientResponseSchema } from '../../presentation/schemas/jow-ingredient.schema';
-
+// import { axiosInstance } from "../http/axios-instance";
+import { ingredientSchema } from '../../presentation/schemas/jow-ingredient.schema';
 
 export class HttpJowIngredientRepository implements IngredientRepository {
-  
-async findByNameAndUnit(name: string, unit: Unit): Promise<Ingredient | null> {
-    const response = await axiosInstance.get(
+  async findByNameAndUnit(name: string, unit: Unit): Promise<Ingredient | null> {
+    const response = await axios.get(
       `https://api.jow.fr/public/ingredients/search?query=${encodeURIComponent(name)}&limit=1&start=0&availabilityZoneId=FR`
     );
 
-    const validatedResponse = jowIngredientResponseSchema.parse(response.data);
+    const validatedIngredients = ingredientSchema.array().parse(response.data);
     
-    if (validatedResponse.data.length === 0) {
+    if (validatedIngredients.length === 0) {
       return null;
     }
     
-    const ingredient = validatedResponse.data[0];
+    const [ingredient] = validatedIngredients;
     const jowUnitLabel = HttpJowIngredientRepository.getJowUnitLabel(unit.name);
     
+    // Find matching displayable unit and its abbreviation
     const matchingUnit = ingredient.displayableUnits.find(du => du.label === jowUnitLabel);
     
     if (!matchingUnit) {
@@ -28,9 +29,20 @@ async findByNameAndUnit(name: string, unit: Unit): Promise<Ingredient | null> {
       return null;
     }
 
+    // Find matching abbreviation for the unit
+    const abbreviation = matchingUnit.unit.abbreviations.find(
+      abbr => abbr.label === jowUnitLabel
+    );
+
+    if (!abbreviation) {
+      console.warn(`No matching abbreviation found for ${jowUnitLabel}`);
+      return null;
+    }
+
     const newUnit = new Unit(
       matchingUnit.unit._id,
       matchingUnit.unit.name,
+      abbreviation.divisor
     );
 
     return new Ingredient(
@@ -40,12 +52,12 @@ async findByNameAndUnit(name: string, unit: Unit): Promise<Ingredient | null> {
       newUnit,
       1
     );
-}
+  }
 
   private static getJowUnitLabel(unit: string): string {
     const unitMap: Record<string, string> = {
       'cc': 'Cuillère à café',
-      'cs': 'Cuillère à soupe',
+      'cs': 'Cuillère à soupe', 
       'g': 'g',
       'ml': 'ml',
       'l': 'l',

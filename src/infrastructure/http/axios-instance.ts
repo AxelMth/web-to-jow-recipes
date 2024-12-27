@@ -1,9 +1,29 @@
 import axios from 'axios';
 
-export const axiosInstance = axios.create({
-  timeout: 5000,
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.SOURCE_BEARER_TOKEN}`
-  }
-});
+let instance = axios.create();
+
+export const resetAxiosInstance = (token?: string) => {
+  instance = axios.create({
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  
+  // Add interceptor to handle token updates
+  instance.interceptors.request.use(
+    (config) => {
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+};
+
+// Initialize instance with interceptor
+resetAxiosInstance();
+
+export const axiosInstance = instance;

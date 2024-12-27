@@ -7,7 +7,7 @@ import { Duration } from "../../domain/value-objects/duration";
 import { sourceRecipeSchema } from "../../presentation/schemas/source-recipe.schema";
 
 export class SourceRecipeAdapter {
-  static toDomain(sourceData: z.infer<typeof sourceRecipeSchema>): Recipe {    console.log('toDomain', sourceData);
+  static toDomain(sourceData: z.infer<typeof sourceRecipeSchema>): Recipe {
     const yields = sourceData.yields.find(y => y.yields === 1);
     const ingredients = sourceData.ingredients.map(ing => {
       const foundIngredient = yields?.ingredients.find(yieldIng => yieldIng.id === ing.id);
@@ -15,7 +15,7 @@ export class SourceRecipeAdapter {
         ing.id,
         ing.name,
         ing.imageLink,
-        { id: foundIngredient?.unit || '', name: foundIngredient?.unit || '' },
+        { id: foundIngredient?.unit || '', name: foundIngredient?.unit || '', divisor: 1 },   
         foundIngredient?.amount || 0
       );
     });

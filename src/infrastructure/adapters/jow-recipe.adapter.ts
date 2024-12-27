@@ -7,7 +7,6 @@ import { jowRecipeSchema } from "../../presentation/schemas/jow-recipe.schema";
 
 export class JowRecipeAdapter {
   static toJow(recipe: Recipe): z.infer<typeof jowRecipeSchema> {
-    console.log('toJow', recipe);
     return {
       additionalConstituents: [],
       backgroundPattern: {
@@ -80,23 +79,6 @@ export class JowRecipeAdapter {
       abbreviations: this.getDefaultAbbreviations(ingredient.unit.id),
       id: ingredient.unit.id
     };
-  }
-
-  private static getUnitName(unit: string): string {
-    const unitConversionMap = {
-      'cc': 'Cuillère à café',
-      'cs': 'Cuillère à soupe',
-      'g': 'Grammes',
-      'ml': 'Millilitres',
-      'l': 'Litres',
-      'kg': 'Kilogrammes',
-      'pièce(s)': 'Pièce',
-      'paquet(s)': 'Pièce',
-      'sachet(s)': 'Pièce',
-    };
-    console.log('getUnitName', unit);  
-    console.log('getUnitName', unitConversionMap[unit.toLowerCase() as keyof typeof unitConversionMap]);  
-    return unitConversionMap[unit.toLowerCase() as keyof typeof unitConversionMap] || unit;
   }
 
   private static getDefaultTools() {

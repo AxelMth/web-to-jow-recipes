@@ -27,8 +27,8 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
             jowIngredient.id,
             jowIngredient.name,
             jowIngredient.imageUrl,
-            ingredient.unit,
-            ingredient.quantity,
+            jowIngredient.unit,
+            ingredient.quantity / jowIngredient.unit.divisor,
           );
           validatedIngredients.push(validatedIngredient);
         }
