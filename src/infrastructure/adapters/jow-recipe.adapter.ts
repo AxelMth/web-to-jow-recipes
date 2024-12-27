@@ -1,6 +1,9 @@
-import { z } from "zod";
+import z from "zod";
+
+import { Ingredient } from "@/domain/entities/ingredient";
 import { Recipe } from "../../domain/entities/recipe";
 import { jowRecipeSchema } from "../../presentation/schemas/jow-recipe.schema";
+
 
 export class JowRecipeAdapter {
   static toJow(recipe: Recipe): z.infer<typeof jowRecipeSchema> {
@@ -22,50 +25,32 @@ export class JowRecipeAdapter {
               us: false
             },
             name: ing.unit,
-            _id: `unit_${ing.id}`,
+            _id: ing.id,
             updatedAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             isNatural: true,
-            __v: 0,
-            abbreviations: [{
-              label: ing.unit,
-              digits: 0,
-              divisor: 1,
-              inverse: false,
-              _id: `abbr_${ing.id}`,
-              minAmount: 0,
-              id: `abbr_${ing.id}`
-            }],
-            id: `unit_${ing.id}`
+            __v: 14,
+            abbreviations: this.getDefaultAbbreviations(ing.id),
+            id: `${ing.id}`
           },
-          displayableUnits: [],
+          displayableUnits: this.getDisplayableUnits(ing),
           _id: ing.id,
-          isBasicIngredient: true,
-          alternativeUnits: [],
+          isBasicIngredient: false,
+          alternativeUnits: this.getAlternativeUnits(ing),
           isAdditionalConstituent: false,
           scores: [0],
           boldName: `{{${ing.name}}}`
         },
-        quantityPerCover: ing.quantity || 1,
-        unit: {
-          measurementSystemCompatibility: {
-            metric: true,
-            imperial: false,
-            us: false
-          },
-          name: ing.unit,
-          _id: `unit_${ing.id}`,
-          abbreviations: [],
-          id: `unit_${ing.id}`
-        }
+        quantityPerCover: Math.abs(ing.quantity),
+        unit: this.getStandardUnit(ing)
       })),
-      cookingTime: String(recipe.totalTime.toMinutes() - recipe.prepTime.toMinutes()),
-      directions: recipe.steps.map(() => ({
-        label: "Étape",
+      cookingTime: String(Math.abs(recipe.totalTime.toMinutes() - recipe.prepTime.toMinutes())),
+      directions: recipe.steps.map(step => ({
+        label: step.description.replace(/\\n/g, '\n').trim(),
         involvedIngredients: []
       })),
-      recipeFamily: "default",
-      requiredTools: [],
+      recipeFamily: "5fc78542aaaddb03d10f47bc",
+      requiredTools: this.getDefaultTools(),
       imageUrl: recipe.imageUrl || "",
       placeHolderUrl: "placeholders/plate.png",
       preparationTime: String(recipe.prepTime.toMinutes()),
@@ -78,5 +63,44 @@ export class JowRecipeAdapter {
       userConstituents: [],
       userCoversCount: recipe.servingSize || 4
     };
+  }
+
+  private static getDefaultAbbreviations(id: string) {
+    // Implementation of default abbreviations
+    return []
+  }
+
+  private static getDisplayableUnits(ingredient: Ingredient) {
+    // Implementation of displayable units
+    return []
+  }
+
+  private static getAlternativeUnits(ingredient: Ingredient) {
+    // Implementation of alternative units
+    return []
+  }
+
+  private static getStandardUnit(ingredient: Ingredient) {
+    // Implementation of standard unit
+    return {
+      measurementSystemCompatibility: {
+        metric: true,
+        imperial: false,
+        us: false
+      },
+      name: ingredient.unit,
+      _id: `${ingredient.id}`,
+      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      isNatural: true,
+      __v: 14,
+      abbreviations: this.getDefaultAbbreviations(ingredient.id),
+      id: ingredient.id
+    };
+  }
+
+  private static getDefaultTools() {
+    // Implementation of default tools
+    return []
   }
 }
