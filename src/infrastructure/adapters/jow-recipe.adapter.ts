@@ -7,6 +7,7 @@ import { jowRecipeSchema } from "../../presentation/schemas/jow-recipe.schema";
 
 export class JowRecipeAdapter {
   static toJow(recipe: Recipe): z.infer<typeof jowRecipeSchema> {
+    console.log('toJow', recipe);
     return {
       additionalConstituents: [],
       backgroundPattern: {
@@ -18,25 +19,8 @@ export class JowRecipeAdapter {
           id: ing.id,
           name: ing.name,
           imageUrl: ing.imageUrl,
-          naturalUnit: {
-            measurementSystemCompatibility: {
-              metric: true,
-              imperial: false,
-              us: false
-            },
-            name: ing.unit,
-            _id: ing.id,
-            updatedAt: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
-            isNatural: true,
-            __v: 14,
-            abbreviations: this.getDefaultAbbreviations(ing.id),
-            id: `${ing.id}`
-          },
-          displayableUnits: this.getDisplayableUnits(ing),
           _id: ing.id,
-          isBasicIngredient: false,
-          alternativeUnits: this.getAlternativeUnits(ing),
+          isBasicIngredient: true,
           isAdditionalConstituent: false,
           scores: [0],
           boldName: `{{${ing.name}}}`
@@ -81,22 +65,38 @@ export class JowRecipeAdapter {
   }
 
   private static getStandardUnit(ingredient: Ingredient) {
-    // Implementation of standard unit
     return {
       measurementSystemCompatibility: {
         metric: true,
         imperial: false,
-        us: false
+        us: false,
       },
-      name: ingredient.unit,
-      _id: `${ingredient.id}`,
+      name: ingredient.unit.name,
+      _id: ingredient.unit.id,
       updatedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       isNatural: true,
       __v: 14,
-      abbreviations: this.getDefaultAbbreviations(ingredient.id),
-      id: ingredient.id
+      abbreviations: this.getDefaultAbbreviations(ingredient.unit.id),
+      id: ingredient.unit.id
     };
+  }
+
+  private static getUnitName(unit: string): string {
+    const unitConversionMap = {
+      'cc': 'Cuillère à café',
+      'cs': 'Cuillère à soupe',
+      'g': 'Grammes',
+      'ml': 'Millilitres',
+      'l': 'Litres',
+      'kg': 'Kilogrammes',
+      'pièce(s)': 'Pièce',
+      'paquet(s)': 'Pièce',
+      'sachet(s)': 'Pièce',
+    };
+    console.log('getUnitName', unit);  
+    console.log('getUnitName', unitConversionMap[unit.toLowerCase() as keyof typeof unitConversionMap]);  
+    return unitConversionMap[unit.toLowerCase() as keyof typeof unitConversionMap] || unit;
   }
 
   private static getDefaultTools() {

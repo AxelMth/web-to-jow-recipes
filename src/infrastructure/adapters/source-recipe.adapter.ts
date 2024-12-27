@@ -7,17 +7,22 @@ import { Duration } from "../../domain/value-objects/duration";
 import { sourceRecipeSchema } from "../../presentation/schemas/source-recipe.schema";
 
 export class SourceRecipeAdapter {
-  static toDomain(sourceData: z.infer<typeof sourceRecipeSchema>): Recipe {
-    return new Recipe(
-      sourceData.id,
-      sourceData.name,
-      sourceData.ingredients.map(ing => new Ingredient(
+  static toDomain(sourceData: z.infer<typeof sourceRecipeSchema>): Recipe {    console.log('toDomain', sourceData);
+    const yields = sourceData.yields.find(y => y.yields === 1);
+    const ingredients = sourceData.ingredients.map(ing => {
+      const foundIngredient = yields?.ingredients.find(yieldIng => yieldIng.id === ing.id);
+      return new Ingredient(
         ing.id,
         ing.name,
         ing.imageLink,
-        sourceData.yields[0].ingredients.find(yieldIng => yieldIng.id === ing.id)?.unit || '',
-        sourceData.yields[0].ingredients.find(yieldIng => yieldIng.id === ing.id)?.amount || 0,
-      )),
+        { id: foundIngredient?.unit || '', name: foundIngredient?.unit || '' },
+        foundIngredient?.amount || 0
+      );
+    });
+    return new Recipe(
+      sourceData.id,
+      sourceData.name,
+      ingredients,
       sourceData.steps.map(step => new Step(
         step.instructions,
       )),
