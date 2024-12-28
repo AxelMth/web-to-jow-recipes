@@ -39,10 +39,10 @@ const displayableUnitSchema = z.object({
 });
 
 const alternativeUnitSchema = z.object({
-  _id: z.string(),
+  _id: z.string().optional(),
   unit: unitSchema,
   quantity: z.number(),
-  id: z.string(),
+  id: z.string().optional(),
 });
 
 const ingredientSchema = z.object({

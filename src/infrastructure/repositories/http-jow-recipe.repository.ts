@@ -16,18 +16,48 @@ export class HttpJowRecipeRepository implements RecipeTargetRepository {
   }
 
   async getAllRecipes(): Promise<Recipe[]> {
-    const response = await axios.get(`${process.env.JOW_URL}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.JOW_BEARER_TOKEN}`,
-      },
-    });
-    const recipes = jowRecipeSchema.array().parse(response.data.recipes);
-    return recipes.map((data: any) => JowRecipeAdapter.toDomain(data));
+    const limit = 50;
+    let start = 0;
+    let allRecipes: Recipe[] = [];
+    let hasMore = true;
+
+    while (hasMore) {
+      const response = await axios.get(
+        `${process.env.JOW_URL}?start=${start}&limit=${limit}`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.JOW_BEARER_TOKEN}`,
+          },
+        }
+      );
+
+      const recipes = jowRecipeSchema.array().parse(response.data.recipes);
+      allRecipes = [
+        ...allRecipes,
+        ...recipes.map((data: any) => JowRecipeAdapter.toDomain(data)),
+      ];
+
+      if (recipes.length < limit) {
+        hasMore = false;
+      }
+      start += limit;
+    }
+
+    return allRecipes;
   }
 
   async deleteRecipeById(id: string): Promise<void> {
     console.log(`Deleting recipe with id ${id}...`);
     await axios.delete(`${process.env.JOW_URL}/${id}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.JOW_BEARER_TOKEN}`,
+      },
+    });
+  }
+
+  async uploadImage(recipeId: string, image: Buffer): Promise<void> {
+    console.log(`Uploading image for recipe with id ${recipeId}...`);
+    await axios.post(`${process.env.JOW_URL}/${recipeId}/image`, image, {
       headers: {
         Authorization: `Bearer ${process.env.JOW_BEARER_TOKEN}`,
       },
