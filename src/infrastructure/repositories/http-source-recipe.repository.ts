@@ -7,10 +7,21 @@ import { sourceResponseSchema } from '../../presentation/schemas/source-recipe.s
 import { SourceRecipeAdapter } from '../adapters/source-recipe.adapter';
 
 export class HttpSourceRecipeRepository implements RecipeSourceRepository {
-  async fetchPaginatedRecipes(page: number): Promise<Recipe[]> {
+  async fetchPaginatedRecipes(
+    page: number,
+    itemsPerPage: number
+  ): Promise<{
+    recipes: Recipe[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      itemsPerPage: number;
+    };
+  }> {
     // resetAxiosInstance();
     const response = await axios.get(
-      `${process.env.SOURCE_URL}?country=fr&locale=fr-FR&not-author=thermomix&order=-date&product=classic-box%7Cclassic-menu%7Cclassic-plan&skip=${page - 1}&take=${5}`,
+      `${process.env.SOURCE_URL}?country=fr&locale=fr-FR&not-author=thermomix&order=-date&product=classic-box%7Cclassic-menu%7Cclassic-plan&skip=${page - 1}&take=${itemsPerPage}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.SOURCE_BEARER_TOKEN}`,
@@ -18,6 +29,16 @@ export class HttpSourceRecipeRepository implements RecipeSourceRepository {
       }
     );
     const validatedData = sourceResponseSchema.parse(response.data);
-    return validatedData.items.map(data => SourceRecipeAdapter.toDomain(data));
+    return {
+      recipes: validatedData.items.map(data =>
+        SourceRecipeAdapter.toDomain(data)
+      ),
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(validatedData.total / itemsPerPage),
+        totalItems: validatedData.total,
+        itemsPerPage: itemsPerPage,
+      },
+    };
   }
 }

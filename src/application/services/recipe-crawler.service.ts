@@ -12,51 +12,44 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
     private readonly ingredientRepo: IngredientRepository
   ) {}
 
-  async crawlAndTransform(page: number): Promise<void> {
-    const recipes = await this.sourceRepo.fetchPaginatedRecipes(page);
+  async crawlAndTransform(): Promise<{
+    processed: number;
+    failed: number;
+    errors: string[];
+  }> {
+    let page = 1;
+    const itemsPerPage = 10;
 
-    for (const recipe of recipes) {
-      console.log(`Crawling recipe ${recipe.name}...`);
+    let processed = 0;
+    let failed = 0;
+    const errors: string[] = [];
 
-      const validatedIngredients: Ingredient[] = [];
+    let hasNextPage = true;
 
-      // Validate each ingredient
-      for (const ingredient of recipe.ingredients) {
-        const result = await this.ingredientRepo.findByNameAndUnit(
-          ingredient.name,
-          ingredient.unit
-        );
-        if (result) {
-          const { ingredient: jowIngredient, shouldUseUnit } = result;
-          // Create new ingredient instance preserving quantity and unit
-          const validatedIngredient = new Ingredient(
-            jowIngredient.id,
-            jowIngredient.name,
-            jowIngredient.imageUrl,
-            jowIngredient.unit,
-            (shouldUseUnit ? jowIngredient.quantity : ingredient.quantity) /
-              jowIngredient.unit.divisor
-          );
-          validatedIngredients.push(validatedIngredient);
-        }
+    while (hasNextPage) {
+      console.log(`Fetching page ${page}...`);
+      const { recipes, pagination } =
+        await this.sourceRepo.fetchPaginatedRecipes(page, itemsPerPage);
+
+      for (const recipe of recipes) {
+        console.log(`Crawling recipe ${recipe.name}...`);
+        const validatedRecipe = await this.transformRecipes(recipe);
+        await this.targetRepo
+          .saveRecipe(validatedRecipe)
+          .then(() => {
+            processed++;
+          })
+          .catch(error => {
+            failed++;
+            errors.push(error);
+          });
       }
 
-      if (validatedIngredients.length > 0) {
-        // Create new recipe with validated ingredients
-        const validatedRecipe = new Recipe(
-          recipe.id,
-          recipe.name,
-          validatedIngredients,
-          recipe.steps,
-          recipe.prepTime,
-          recipe.totalTime,
-          recipe.imageUrl,
-          recipe.servingSize
-        );
-
-        await this.targetRepo.saveRecipe(validatedRecipe);
-      }
+      hasNextPage = pagination.totalItems > page * itemsPerPage;
+      page++;
     }
+
+    return { processed, failed, errors };
   }
 
   async deleteAllRecipes(): Promise<void> {
@@ -64,5 +57,48 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
     for (const recipe of recipes) {
       await this.targetRepo.deleteRecipeById(recipe.id);
     }
+  }
+
+  private async transformRecipes(recipe: Recipe): Promise<Recipe> {
+    const validatedIngredients: Ingredient[] = [];
+
+    // Validate each ingredient
+    for (const ingredient of recipe.ingredients) {
+      const result = await this.ingredientRepo.findByNameAndUnit(
+        ingredient.name,
+        ingredient.unit
+      );
+      if (result) {
+        const { ingredient: jowIngredient, shouldUseUnit } = result;
+        // Create new ingredient instance preserving quantity and unit
+        const validatedIngredient = new Ingredient(
+          jowIngredient.id,
+          jowIngredient.name,
+          jowIngredient.imageUrl,
+          jowIngredient.unit,
+          (shouldUseUnit ? jowIngredient.quantity : ingredient.quantity) /
+            jowIngredient.unit.divisor
+        );
+        validatedIngredients.push(validatedIngredient);
+      }
+    }
+
+    if (validatedIngredients.length > 0) {
+      // Create new recipe with validated ingredients
+      const validatedRecipe = new Recipe(
+        recipe.id,
+        recipe.name,
+        validatedIngredients,
+        recipe.steps,
+        recipe.prepTime,
+        recipe.totalTime,
+        recipe.imageUrl,
+        recipe.servingSize
+      );
+
+      return validatedRecipe;
+    }
+
+    return recipe;
   }
 }

@@ -1,4 +1,8 @@
 export interface RecipeCrawlerUseCase {
-  crawlAndTransform(page: number): Promise<void>;
+  crawlAndTransform(): Promise<{
+    processed: number;
+    failed: number;
+    errors: string[];
+  }>;
   deleteAllRecipes(): Promise<void>;
 }

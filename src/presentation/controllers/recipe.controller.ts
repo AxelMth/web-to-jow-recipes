@@ -6,8 +6,7 @@ export class RecipeController {
 
   public async crawlRecipes(req: Request, res: Response): Promise<void> {
     try {
-      const { page = 1 } = req.query;
-      await this.recipeCrawlerUseCase.crawlAndTransform(Number(page));
+      await this.recipeCrawlerUseCase.crawlAndTransform();
       res.status(200).json({ message: 'Recipes crawled successfully' });
     } catch (error) {
       console.error(JSON.stringify(error, null, 2));
