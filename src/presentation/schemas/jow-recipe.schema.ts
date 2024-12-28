@@ -8,7 +8,7 @@ const measurementSystemSchema = z.object({
 });
 
 const abbreviationSchema = z.object({
-  label: z.string(),
+  label: z.string().optional(),
   digits: z.number(),
   divisor: z.number(),
   inverse: z.boolean(),
@@ -54,9 +54,9 @@ const ingredientSchema = z.object({
   _id: z.string().optional(),
   isBasicIngredient: z.boolean(),
   alternativeUnits: z.array(alternativeUnitSchema).optional(),
-  isAdditionalConstituent: z.boolean(),
-  scores: z.array(z.number()),
-  boldName: z.string(),
+  isAdditionalConstituent: z.boolean().optional(),
+  scores: z.array(z.number()).optional(),
+  boldName: z.string().optional(),
 });
 
 const constituentSchema = z.object({
@@ -86,19 +86,20 @@ const toolSchema = z.object({
 
 // Main recipe schema
 export const jowRecipeSchema = z.object({
+  _id: z.string(),
   additionalConstituents: z.array(z.any()),
   backgroundPattern: z.object({
     color: z.string(),
     imageUrl: z.string(),
   }),
   constituents: z.array(constituentSchema),
-  cookingTime: z.string(),
+  cookingTime: z.number(),
   directions: z.array(directionSchema),
   recipeFamily: z.string(),
   requiredTools: z.array(toolSchema),
   imageUrl: z.string(),
   placeHolderUrl: z.string(),
-  preparationTime: z.string(),
+  preparationTime: z.number(),
   restingTime: z.number(),
   staticCoversCount: z.boolean(),
   tip: z.object({

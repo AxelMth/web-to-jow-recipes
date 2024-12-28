@@ -10,7 +10,7 @@ export class HttpSourceRecipeRepository implements RecipeSourceRepository {
   async fetchPaginatedRecipes(page: number): Promise<Recipe[]> {
     // resetAxiosInstance();
     const response = await axios.get(
-      `${process.env.SOURCE_URL}?country=fr&locale=fr-FR&not-author=thermomix&order=-date&product=classic-box%7Cclassic-menu%7Cclassic-plan&skip=${page - 1}&take=${1}`,
+      `${process.env.SOURCE_URL}?country=fr&locale=fr-FR&not-author=thermomix&order=-date&product=classic-box%7Cclassic-menu%7Cclassic-plan&skip=${page - 1}&take=${5}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.SOURCE_BEARER_TOKEN}`,

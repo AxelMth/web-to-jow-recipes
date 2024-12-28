@@ -42,6 +42,9 @@ export class Server {
     this.app.post('/api/recipes/crawl', (req, res) =>
       recipeController.crawlRecipes(req, res)
     );
+    this.app.delete('/api/recipes', (req, res) =>
+      recipeController.deleteAllRecipes(req, res)
+    );
   }
 
   public start(): void {

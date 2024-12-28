@@ -56,4 +56,11 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
       }
     }
   }
+
+  async deleteAllRecipes(): Promise<void> {
+    const recipes = await this.targetRepo.getAllRecipes();
+    for (const recipe of recipes) {
+      await this.targetRepo.deleteRecipeById(recipe.id);
+    }
+  }
 }

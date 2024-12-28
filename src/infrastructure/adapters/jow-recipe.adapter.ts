@@ -1,12 +1,16 @@
 import z from 'zod';
 
-import { Ingredient } from '@/domain/entities/ingredient';
+import { Ingredient } from '../../domain/entities/ingredient';
 import { Recipe } from '../../domain/entities/recipe';
 import { jowRecipeSchema } from '../../presentation/schemas/jow-recipe.schema';
+import { Duration } from '../../domain/value-objects/duration';
+import { Step } from '../../domain/entities/step';
+import { Unit } from '../../domain/entities/unit';
 
 export class JowRecipeAdapter {
   static toJow(recipe: Recipe): z.infer<typeof jowRecipeSchema> {
     return {
+      _id: recipe.id,
       additionalConstituents: [],
       backgroundPattern: {
         color: '#fcb2b0',
@@ -26,8 +30,8 @@ export class JowRecipeAdapter {
         quantityPerCover: Math.abs(ing.quantity),
         unit: this.getStandardUnit(ing),
       })),
-      cookingTime: String(
-        Math.abs(recipe.totalTime.toMinutes() - recipe.prepTime.toMinutes())
+      cookingTime: Math.abs(
+        recipe.totalTime.toMinutes() - recipe.prepTime.toMinutes()
       ),
       directions: recipe.steps.map(step => ({
         label: step.description.replace(/\\n/g, '\n').trim(),
@@ -37,7 +41,7 @@ export class JowRecipeAdapter {
       requiredTools: this.getDefaultTools(),
       imageUrl: recipe.imageUrl || '',
       placeHolderUrl: 'placeholders/plate.png',
-      preparationTime: String(recipe.prepTime.toMinutes()),
+      preparationTime: recipe.prepTime.toMinutes(),
       restingTime: 0,
       staticCoversCount: false,
       tip: {
@@ -47,6 +51,27 @@ export class JowRecipeAdapter {
       userConstituents: [],
       userCoversCount: recipe.servingSize || 4,
     };
+  }
+
+  static toDomain(data: z.infer<typeof jowRecipeSchema>): Recipe {
+    return new Recipe(
+      data._id,
+      data.title,
+      data.constituents.map(
+        ing =>
+          new Ingredient(
+            ing.ingredient.id,
+            ing.ingredient.name,
+            ing.ingredient.imageUrl,
+            new Unit(ing.unit.id, ing.unit.name, 1),
+            ing.quantityPerCover
+          )
+      ),
+      data.directions.map(step => new Step(step.label)),
+      new Duration(Number(data.preparationTime)),
+      new Duration(Number(data.cookingTime)),
+      data.imageUrl
+    );
   }
 
   private static getDefaultAbbreviations(id: string) {
