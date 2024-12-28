@@ -14,13 +14,18 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
 
   async crawlAndTransform(page: number): Promise<void> {
     const recipes = await this.sourceRepo.fetchPaginatedRecipes(page);
-    
+
     for (const recipe of recipes) {
+      console.log(`Crawling recipe ${recipe.name}...`);
+
       const validatedIngredients: Ingredient[] = [];
-      
+
       // Validate each ingredient
       for (const ingredient of recipe.ingredients) {
-        const jowIngredient = await this.ingredientRepo.findByNameAndUnit(ingredient.name, ingredient.unit);
+        const jowIngredient = await this.ingredientRepo.findByNameAndUnit(
+          ingredient.name,
+          ingredient.unit
+        );
         if (jowIngredient) {
           // Create new ingredient instance preserving quantity and unit
           const validatedIngredient = new Ingredient(
@@ -28,7 +33,7 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
             jowIngredient.name,
             jowIngredient.imageUrl,
             jowIngredient.unit,
-            ingredient.quantity / jowIngredient.unit.divisor,
+            ingredient.quantity / jowIngredient.unit.divisor
           );
           validatedIngredients.push(validatedIngredient);
         }

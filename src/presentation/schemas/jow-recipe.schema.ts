@@ -1,10 +1,10 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 // Nested schemas
 const measurementSystemSchema = z.object({
   metric: z.boolean(),
   imperial: z.boolean(),
-  us: z.boolean()
+  us: z.boolean(),
 });
 
 const abbreviationSchema = z.object({
@@ -15,7 +15,7 @@ const abbreviationSchema = z.object({
   _id: z.string(),
   minAmount: z.number(),
   maxAmount: z.number().optional(),
-  id: z.string()
+  id: z.string(),
 });
 
 const unitSchema = z.object({
@@ -28,21 +28,21 @@ const unitSchema = z.object({
   __v: z.number().optional(),
   abbreviations: z.array(abbreviationSchema),
   comments: z.string().optional(),
-  id: z.string()
+  id: z.string(),
 });
 
 const displayableUnitSchema = z.object({
   label: z.string(),
   name: z.string(),
   abbreviationId: z.string(),
-  unit: unitSchema
+  unit: unitSchema,
 });
 
 const alternativeUnitSchema = z.object({
   _id: z.string(),
   unit: unitSchema,
   quantity: z.number(),
-  id: z.string()
+  id: z.string(),
 });
 
 const ingredientSchema = z.object({
@@ -56,18 +56,18 @@ const ingredientSchema = z.object({
   alternativeUnits: z.array(alternativeUnitSchema).optional(),
   isAdditionalConstituent: z.boolean(),
   scores: z.array(z.number()),
-  boldName: z.string()
+  boldName: z.string(),
 });
 
 const constituentSchema = z.object({
   ingredient: ingredientSchema,
   quantityPerCover: z.number(),
-  unit: unitSchema
+  unit: unitSchema,
 });
 
 const directionSchema = z.object({
   label: z.string(),
-  involvedIngredients: z.array(z.any())
+  involvedIngredients: z.array(z.any()),
 });
 
 const toolSchema = z.object({
@@ -81,7 +81,7 @@ const toolSchema = z.object({
   name: z.string(),
   isDefaultChecked: z.boolean(),
   imageUrl: z.string(),
-  childrenTools: z.array(z.any())
+  childrenTools: z.array(z.any()),
 });
 
 // Main recipe schema
@@ -89,7 +89,7 @@ export const jowRecipeSchema = z.object({
   additionalConstituents: z.array(z.any()),
   backgroundPattern: z.object({
     color: z.string(),
-    imageUrl: z.string()
+    imageUrl: z.string(),
   }),
   constituents: z.array(constituentSchema),
   cookingTime: z.string(),
@@ -102,11 +102,11 @@ export const jowRecipeSchema = z.object({
   restingTime: z.number(),
   staticCoversCount: z.boolean(),
   tip: z.object({
-    description: z.string().optional()
+    description: z.string().optional(),
   }),
   title: z.string(),
   userConstituents: z.array(z.any()),
-  userCoversCount: z.number()
+  userCoversCount: z.number(),
 });
 
 export type JowRecipe = z.infer<typeof jowRecipeSchema>;

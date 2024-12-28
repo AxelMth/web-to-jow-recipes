@@ -27,15 +27,21 @@ export class Server {
     const sourceRepo = new HttpSourceRecipeRepository();
     const targetRepo = new HttpJowRecipeRepository();
     const ingredientsRepo = new HttpJowIngredientRepository();
-    const crawlerService = new RecipeCrawlerService(sourceRepo, targetRepo, ingredientsRepo);
+    const crawlerService = new RecipeCrawlerService(
+      sourceRepo,
+      targetRepo,
+      ingredientsRepo
+    );
     const recipeController = new RecipeController(crawlerService);
 
     this.app.get('/health', (_: Request, res: Response) => {
-        res.send({
-            status: 'ok',
-        });
+      res.send({
+        status: 'ok',
+      });
     });
-    this.app.post('/api/recipes/crawl', (req, res) => recipeController.crawlRecipes(req, res));
+    this.app.post('/api/recipes/crawl', (req, res) =>
+      recipeController.crawlRecipes(req, res)
+    );
   }
 
   public start(): void {

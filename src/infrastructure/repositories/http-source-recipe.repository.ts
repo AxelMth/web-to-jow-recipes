@@ -9,11 +9,14 @@ import { SourceRecipeAdapter } from '../adapters/source-recipe.adapter';
 export class HttpSourceRecipeRepository implements RecipeSourceRepository {
   async fetchPaginatedRecipes(page: number): Promise<Recipe[]> {
     // resetAxiosInstance();
-    const response = await axios.get(`${process.env.SOURCE_URL}?country=fr&locale=fr-FR&not-author=thermomix&order=-date&product=classic-box%7Cclassic-menu%7Cclassic-plan&skip=${page-1}&take=${1}`, {
-      headers: {
-        'Authorization': `Bearer ${process.env.SOURCE_BEARER_TOKEN}`
+    const response = await axios.get(
+      `${process.env.SOURCE_URL}?country=fr&locale=fr-FR&not-author=thermomix&order=-date&product=classic-box%7Cclassic-menu%7Cclassic-plan&skip=${page - 1}&take=${1}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.SOURCE_BEARER_TOKEN}`,
+        },
       }
-    });
+    );
     const validatedData = sourceResponseSchema.parse(response.data);
     return validatedData.items.map(data => SourceRecipeAdapter.toDomain(data));
   }

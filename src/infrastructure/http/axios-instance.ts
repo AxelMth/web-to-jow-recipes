@@ -8,16 +8,16 @@ export const resetAxiosInstance = (token?: string) => {
       'Content-Type': 'application/json',
     },
   });
-  
+
   // Add interceptor to handle token updates
   instance.interceptors.request.use(
-    (config) => {
+    config => {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
       return config;
     },
-    (error) => {
+    error => {
       return Promise.reject(error);
     }
   );

@@ -11,9 +11,9 @@ export class HttpJowRecipeRepository implements RecipeTargetRepository {
     // console.log('Jow Base URL:', process.env.JOW_BEARER_TOKEN);
     await axios.post(`${process.env.JOW_URL}`, JowRecipeAdapter.toJow(recipe), {
       headers: {
-        'Authorization': `Bearer ${process.env.JOW_BEARER_TOKEN}`
-      }
+        Authorization: `Bearer ${process.env.JOW_BEARER_TOKEN}`,
+      },
     });
-    return recipe
+    return recipe;
   }
 }

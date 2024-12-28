@@ -1,6 +1,6 @@
-import { Ingredient } from "./ingredient";
-import { Step } from "./step";
-import { Duration } from "../value-objects/duration";
+import { Ingredient } from './ingredient';
+import { Step } from './step';
+import { Duration } from '../value-objects/duration';
 
 export class Recipe {
   constructor(
