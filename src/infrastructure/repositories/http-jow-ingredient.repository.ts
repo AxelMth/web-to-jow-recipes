@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Fuse, { FuseResult } from 'fuse.js';
+import stringSimilarity from 'string-similarity';
 
 import { Ingredient } from '../../domain/entities/ingredient';
 import { Unit } from '../../domain/entities/unit';
@@ -35,7 +36,7 @@ export class HttpJowIngredientRepository implements IngredientRepository {
   async findByNameAndUnit(
     name: string,
     unit: Unit
-  ): Promise<Ingredient | null> {
+  ): Promise<{ ingredient: Ingredient; shouldUseUnit: boolean } | null> {
     const response = await axios.get(
       `https://api.jow.fr/public/ingredients/search?query=${encodeURIComponent(name)}&limit=10&start=0&availabilityZoneId=FR`
     );
@@ -46,31 +47,14 @@ export class HttpJowIngredientRepository implements IngredientRepository {
       return null;
     }
 
-    const ingredient = validatedIngredients.find(
-      ing =>
-        ing.name === name ||
-        ing.name.toLowerCase() === name.toLowerCase() ||
-        ing.name.includes(name) ||
-        name.includes(ing.name)
-    );
+    let ingredient = matchIngredient(name, validatedIngredients);
 
     if (!ingredient) {
-      const defaultIngredient =
-        HttpJowIngredientRepository.defaultIngredientsMapping[name];
-      if (!defaultIngredient) {
-        console.warn(`No ingredient found for name ${name}`);
-        return null;
-      }
-      return new Ingredient(
-        defaultIngredient.id,
-        defaultIngredient.name,
-        defaultIngredient.imageUrl,
-        defaultIngredient.unit,
-        defaultIngredient.quantity
+      console.warn(
+        `No ingredient found for name ${name}: (available: ${validatedIngredients.map(ing => ing.name).join(', ')})`
       );
+      ingredient = validatedIngredients[0];
     }
-
-    console.info(`Found ingredient ${ingredient.name} for name ${name}`);
 
     const jowUnitLabel = HttpJowIngredientRepository.getJowUnitLabel(unit.name);
 
@@ -87,16 +71,16 @@ export class HttpJowIngredientRepository implements IngredientRepository {
         console.warn(`No default unit found for ingredient ${ingredient.name}`);
         return null;
       }
-      console.warn(
-        `No matching unit found for ingredient ${ingredient.name} and unit ${unit.name}. Using default unit ${defaultUnitKg.unit.name}`
-      );
-      return new Ingredient(
-        ingredient.id,
-        ingredient.name,
-        ingredient.imageUrl,
-        new Unit(defaultUnitKg.unit.id, defaultUnitKg.unit.name, 1000),
-        50
-      );
+      return {
+        ingredient: new Ingredient(
+          ingredient.id,
+          ingredient.name,
+          ingredient.imageUrl,
+          new Unit(defaultUnitKg.unit.id, defaultUnitKg.unit.name, 1000),
+          50
+        ),
+        shouldUseUnit: true,
+      };
     }
 
     // Find matching abbreviation for the unit
@@ -110,13 +94,16 @@ export class HttpJowIngredientRepository implements IngredientRepository {
       abbreviation?.divisor || 1
     );
 
-    return new Ingredient(
-      ingredient.id,
-      ingredient.name,
-      ingredient.imageUrl,
-      newUnit,
-      1
-    );
+    return {
+      ingredient: new Ingredient(
+        ingredient.id,
+        ingredient.name,
+        ingredient.imageUrl,
+        newUnit,
+        1
+      ),
+      shouldUseUnit: false,
+    };
   }
 
   private static getJowUnitLabel(unit: string): string {
@@ -163,5 +150,50 @@ export class HttpJowIngredientRepository implements IngredientRepository {
       unit: new Unit('598c239e14246c127285c14a', 'Kilogramme', 1),
       quantity: 50,
     },
+    Sucrine: {
+      id: '5a649b5506e8ea0014c311c4',
+      name: 'Salade (sucrine)',
+      imageUrl: 'ingredients/ykXMCGLgBgUNJg.jpg.webp"',
+      unit: new Unit('59aadbd4797a8c0011177854', 'Pièce', 1),
+      quantity: 1,
+    },
+    'Dés de filet de dinde': {
+      id: '64f9ba44da5a1f001198c4f5',
+      name: 'Filet de dinde',
+      imageUrl: 'ingredients/fNOWfKgegsYCBA.jpg.webp',
+      unit: new Unit('598c239e14246c127285c14a', 'Kilogramme', 1),
+      quantity: 50,
+    },
   };
+}
+
+function matchIngredient(
+  ingredientName: string,
+  availableIngredients: Zod.infer<typeof ingredientSchema>[],
+  threshold = 0.6
+): Zod.infer<typeof ingredientSchema> | null {
+  // Normalize the ingredient names
+  const normalizedIngredient = ingredientName.toLowerCase();
+  const normalizedAvailable = availableIngredients.map(({ name }) =>
+    name.toLowerCase()
+  );
+
+  // Perform fuzzy matching
+  const matches = stringSimilarity.findBestMatch(
+    normalizedIngredient,
+    normalizedAvailable
+  );
+
+  // Check if the best match is above the threshold
+  const bestMatch = matches.bestMatch;
+  if (bestMatch.rating >= threshold) {
+    return (
+      availableIngredients.find(
+        ({ name }) => name.toLowerCase() === bestMatch.target
+      ) || null
+    );
+  }
+
+  // No suitable match found
+  return null;
 }

@@ -22,18 +22,20 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
 
       // Validate each ingredient
       for (const ingredient of recipe.ingredients) {
-        const jowIngredient = await this.ingredientRepo.findByNameAndUnit(
+        const result = await this.ingredientRepo.findByNameAndUnit(
           ingredient.name,
           ingredient.unit
         );
-        if (jowIngredient) {
+        if (result) {
+          const { ingredient: jowIngredient, shouldUseUnit } = result;
           // Create new ingredient instance preserving quantity and unit
           const validatedIngredient = new Ingredient(
             jowIngredient.id,
             jowIngredient.name,
             jowIngredient.imageUrl,
             jowIngredient.unit,
-            ingredient.quantity / jowIngredient.unit.divisor
+            (shouldUseUnit ? jowIngredient.quantity : ingredient.quantity) /
+              jowIngredient.unit.divisor
           );
           validatedIngredients.push(validatedIngredient);
         }

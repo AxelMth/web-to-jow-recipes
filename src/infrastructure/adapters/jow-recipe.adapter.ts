@@ -10,7 +10,6 @@ import { Unit } from '../../domain/entities/unit';
 export class JowRecipeAdapter {
   static toJow(recipe: Recipe): z.infer<typeof jowRecipeSchema> {
     return {
-      _id: recipe.id,
       additionalConstituents: [],
       backgroundPattern: {
         color: '#fcb2b0',
@@ -55,7 +54,7 @@ export class JowRecipeAdapter {
 
   static toDomain(data: z.infer<typeof jowRecipeSchema>): Recipe {
     return new Recipe(
-      data._id,
+      data._id || '',
       data.title,
       data.constituents.map(
         ing =>

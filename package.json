@@ -15,12 +15,14 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "fuse.js": "^7.0.0",
+    "string-similarity": "^4.0.4",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
+    "@types/string-similarity": "^4.0.2",
     "cors": "^2.8.5",
     "helmet": "^8.0.0",
     "prettier": "^3.4.2",

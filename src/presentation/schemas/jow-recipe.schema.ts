@@ -86,7 +86,7 @@ const toolSchema = z.object({
 
 // Main recipe schema
 export const jowRecipeSchema = z.object({
-  _id: z.string(),
+  _id: z.string().optional(),
   additionalConstituents: z.array(z.any()),
   backgroundPattern: z.object({
     color: z.string(),
