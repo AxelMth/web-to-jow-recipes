@@ -118,51 +118,6 @@ export class HttpJowIngredientRepository implements IngredientRepository {
     };
     return unitMap[unit.toLowerCase()] || unit;
   }
-
-  private static defaultIngredientsMapping: Record<string, Ingredient> = {
-    'Cuisse de poulet': {
-      id: '5a58e2fff9828500142d5212',
-      name: 'Poulet (cuisse)',
-      imageUrl: 'ingredients/qOUBOU4WP6MXOQ.jpg.webp',
-      unit: new Unit('598c23d414246c127285c14b', 'Pièce', 1),
-      quantity: 1,
-    },
-    'Crème épaisse': {
-      id: '6346e1439aaa5c0289da2d6f',
-      name: 'Crème semi-épaisse',
-      imageUrl: 'ingredients/X6saE8aOO3xqyA.png.webp',
-      unit: new Unit('598c237f14246c127285c149', 'Litre', 1),
-      quantity: 50,
-    },
-    "Gousse d'ail": {
-      id: '598b5ebefd078b0011140a17',
-      name: 'Ail',
-      imageUrl: 'ingredients/b3FOqn5Ql1fjOQ.png.webp',
-      unit: new Unit('598c23d414246c127285c14b', 'Pièce', 1),
-      quantity: 1,
-    },
-    'Pecorino râpé': {
-      id: '5d6d19e7d42034318c8f0ce2',
-      name: 'Pecorino Romano',
-      imageUrl: 'ingredients/j6UgEepkRuP3lg.jpg.webp',
-      unit: new Unit('598c239e14246c127285c14a', 'Kilogramme', 1),
-      quantity: 50,
-    },
-    Sucrine: {
-      id: '5a649b5506e8ea0014c311c4',
-      name: 'Salade (sucrine)',
-      imageUrl: 'ingredients/ykXMCGLgBgUNJg.jpg.webp"',
-      unit: new Unit('59aadbd4797a8c0011177854', 'Pièce', 1),
-      quantity: 1,
-    },
-    'Dés de filet de dinde': {
-      id: '64f9ba44da5a1f001198c4f5',
-      name: 'Filet de dinde',
-      imageUrl: 'ingredients/fNOWfKgegsYCBA.jpg.webp',
-      unit: new Unit('598c239e14246c127285c14a', 'Kilogramme', 1),
-      quantity: 50,
-    },
-  };
 }
 
 function matchIngredient(
