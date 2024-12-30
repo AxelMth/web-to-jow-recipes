@@ -50,9 +50,7 @@ export class HttpJowIngredientRepository implements IngredientRepository {
     let ingredient = matchIngredient(name, validatedIngredients);
 
     if (!ingredient) {
-      console.warn(
-        `No ingredient found for name ${name}: (available: ${validatedIngredients.map(ing => ing.name).join(', ')})`
-      );
+      console.warn(`No ingredient found for name ${name}`);
       ingredient = validatedIngredients[0];
     }
 
