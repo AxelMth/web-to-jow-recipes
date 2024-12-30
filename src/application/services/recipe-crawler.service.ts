@@ -24,35 +24,39 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
     let failed = 0;
     const errors: string[] = [];
 
-    let hasNextPage = true;
+    try {
+      let hasNextPage = true;
+      while (hasNextPage) {
+        console.log(`Fetching page ${page}...`);
+        const { recipes, pagination } =
+          await this.sourceRepo.fetchPaginatedRecipes(page, itemsPerPage);
 
-    while (hasNextPage) {
-      console.log(`Fetching page ${page}...`);
-      const { recipes, pagination } =
-        await this.sourceRepo.fetchPaginatedRecipes(page, itemsPerPage);
+        for (let recipe of recipes) {
+          console.log(`Crawling recipe ${recipe.name}...`);
 
-      for (let recipe of recipes) {
-        console.log(`Crawling recipe ${recipe.name}...`);
-        if (recipe.imageUrl) {
-          const { uploadedImageUrl } = await this.targetRepo.uploadImage(
-            recipe.imageUrl
-          );
-          recipe = await this.getRecipeWithImage(recipe, uploadedImageUrl);
+          if (recipe.imageUrl) {
+            const { uploadedImageUrl } = await this.targetRepo.uploadImage(
+              recipe.imageUrl
+            );
+            recipe = this.getRecipeWithImage(recipe, uploadedImageUrl);
+          }
+
+          const validatedRecipe = await this.getRecipeWithIngredients(recipe);
+
+          await this.targetRepo.saveRecipe(validatedRecipe);
+
+          processed++;
         }
-        const validatedRecipe = await this.getRecipeWithIngredients(recipe);
-        await this.targetRepo
-          .saveRecipe(validatedRecipe)
-          .then(() => {
-            processed++;
-          })
-          .catch(error => {
-            failed++;
-            errors.push(error);
-          });
-      }
 
-      hasNextPage = pagination.totalItems > page * itemsPerPage;
-      page++;
+        hasNextPage = pagination.totalItems > page * itemsPerPage;
+        page++;
+      }
+    } catch (error: unknown) {
+      console.error(error);
+      failed++;
+      if (error instanceof Error) {
+        errors.push(error.message);
+      }
     }
 
     return { processed, failed, errors };
