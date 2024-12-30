@@ -31,19 +31,15 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
       const { recipes, pagination } =
         await this.sourceRepo.fetchPaginatedRecipes(page, itemsPerPage);
 
-      for (const recipe of recipes) {
+      for (let recipe of recipes) {
         console.log(`Crawling recipe ${recipe.name}...`);
-        let uploadedImageUrl = '';
         if (recipe.imageUrl) {
-          ({ uploadedImageUrl } = await this.targetRepo.uploadImage(
+          const { uploadedImageUrl } = await this.targetRepo.uploadImage(
             recipe.imageUrl
-          ));
+          );
+          recipe = await this.getRecipeWithImage(recipe, uploadedImageUrl);
         }
-        // TODO: use new function to put imageUrl
-        const validatedRecipe = await this.transformRecipes(
-          recipe,
-          uploadedImageUrl
-        );
+        const validatedRecipe = await this.getRecipeWithIngredients(recipe);
         await this.targetRepo
           .saveRecipe(validatedRecipe)
           .then(() => {
@@ -69,10 +65,7 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
     }
   }
 
-  private async transformRecipes(
-    recipe: Recipe,
-    imageUrl: string
-  ): Promise<Recipe> {
+  private async getRecipeWithIngredients(recipe: Recipe): Promise<Recipe> {
     const validatedIngredients: Ingredient[] = [];
 
     // Validate each ingredient
@@ -105,7 +98,7 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
         recipe.steps,
         recipe.prepTime,
         recipe.totalTime,
-        imageUrl,
+        recipe.imageUrl,
         recipe.servingSize
       );
 
@@ -113,5 +106,18 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
     }
 
     return recipe;
+  }
+
+  private getRecipeWithImage(recipe: Recipe, imageUrl: string): Recipe {
+    return new Recipe(
+      recipe.id,
+      recipe.name,
+      recipe.ingredients,
+      recipe.steps,
+      recipe.prepTime,
+      recipe.totalTime,
+      imageUrl,
+      recipe.servingSize
+    );
   }
 }
