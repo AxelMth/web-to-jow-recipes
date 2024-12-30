@@ -1,4 +1,3 @@
-- Ajouter les photos pour les recettes
 - Use max page argument for crawl
 - Use filters for crawl
-- Remove pepper
+- Remove salt and pepper

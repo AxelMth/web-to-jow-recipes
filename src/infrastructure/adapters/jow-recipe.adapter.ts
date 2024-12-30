@@ -78,16 +78,6 @@ export class JowRecipeAdapter {
     return [];
   }
 
-  private static getDisplayableUnits(ingredient: Ingredient) {
-    // Implementation of displayable units
-    return [];
-  }
-
-  private static getAlternativeUnits(ingredient: Ingredient) {
-    // Implementation of alternative units
-    return [];
-  }
-
   private static getStandardUnit(ingredient: Ingredient) {
     return {
       measurementSystemCompatibility: {
