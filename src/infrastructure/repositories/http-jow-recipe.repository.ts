@@ -68,16 +68,10 @@ export class HttpJowRecipeRepository implements RecipeTargetRepository {
         responseType: 'arraybuffer',
       }
     );
-    const file = await writeFile('image.jpg', image.data);
-    console.log('file', file);
+    await writeFile('image.jpg', image.data);
 
     const data = new FormData();
-    data.append(
-      'image',
-      fs.createReadStream(
-        `https://img.hellofresh.com/c_fit,f_auto,fl_lossy,h_500,q_50,w_500/hellofresh_s3/${imageUrl}`
-      )
-    );
+    data.append('image', fs.createReadStream('image.jpg'));
 
     let config = {
       method: 'post',
