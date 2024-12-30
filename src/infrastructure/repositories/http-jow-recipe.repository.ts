@@ -1,9 +1,14 @@
 import axios from 'axios';
+import FormData from 'form-data';
+import fs from 'fs';
+import { readFile, writeFile } from 'node:fs/promises';
 
 import { Recipe } from '../../domain/entities/recipe';
 import { RecipeTargetRepository } from '../../application/ports/output/recipe-target.repository';
 import { JowRecipeAdapter } from '../adapters/jow-recipe.adapter';
 import { jowRecipeSchema } from '../../presentation/schemas/jow-recipe.schema';
+import { read } from 'node:fs';
+import { exec, execSync } from 'node:child_process';
 
 export class HttpJowRecipeRepository implements RecipeTargetRepository {
   async saveRecipe(recipe: Recipe): Promise<Recipe> {
@@ -55,12 +60,40 @@ export class HttpJowRecipeRepository implements RecipeTargetRepository {
     });
   }
 
-  async uploadImage(recipeId: string, image: Buffer): Promise<void> {
-    console.log(`Uploading image for recipe with id ${recipeId}...`);
-    await axios.post(`${process.env.JOW_URL}/${recipeId}/image`, image, {
+  async uploadImage(imageUrl: string): Promise<{ uploadedImageUrl: string }> {
+    // `https://img.hellofresh.com/c_fit,f_auto,fl_lossy,h_500,q_50,w_500/hellofresh_s3/${imageUrl}`,
+    const image = await axios.get(
+      `https://img.hellofresh.com/c_fit,f_auto,fl_lossy,h_500,q_50,w_500/hellofresh_s3/${imageUrl}`,
+      {
+        responseType: 'arraybuffer',
+      }
+    );
+    const file = await writeFile('image.jpg', image.data);
+    console.log('file', file);
+
+    const data = new FormData();
+    data.append(
+      'image',
+      fs.createReadStream(
+        `https://img.hellofresh.com/c_fit,f_auto,fl_lossy,h_500,q_50,w_500/hellofresh_s3/${imageUrl}`
+      )
+    );
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: 'https://api.jow.fr/public/recipes/uploaded/image',
       headers: {
-        Authorization: `Bearer ${process.env.JOW_BEARER_TOKEN}`,
+        accept: 'application/json',
+        'accept-language': 'fr',
+        authorization: 'Bearer ' + process.env.JOW_BEARER_TOKEN,
+        ...data.getHeaders(),
       },
-    });
+      data,
+    };
+
+    const result = await axios.request(config);
+
+    return { uploadedImageUrl: result.data.imageUrl };
   }
 }

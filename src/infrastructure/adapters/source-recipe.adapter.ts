@@ -31,7 +31,8 @@ export class SourceRecipeAdapter {
       ingredients,
       sourceData.steps.map(step => new Step(step.instructions)),
       Duration.fromPTFormat(sourceData.prepTime),
-      Duration.fromPTFormat(sourceData.totalTime)
+      Duration.fromPTFormat(sourceData.totalTime),
+      sourceData.imagePath
     );
   }
 }

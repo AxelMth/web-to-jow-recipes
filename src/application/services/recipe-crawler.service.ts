@@ -33,7 +33,19 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
 
       for (const recipe of recipes) {
         console.log(`Crawling recipe ${recipe.name}...`);
-        const validatedRecipe = await this.transformRecipes(recipe);
+        let uploadedImageUrl = '';
+        if (recipe.imageUrl) {
+          console.log(`Uploading image for recipe ${recipe.name}...`);
+          ({ uploadedImageUrl } = await this.targetRepo.uploadImage(
+            recipe.imageUrl
+          ));
+          console.log(`Image uploaded: ${uploadedImageUrl}`);
+        }
+        // TODO: use new function to put imageUrl
+        const validatedRecipe = await this.transformRecipes(
+          recipe,
+          uploadedImageUrl
+        );
         await this.targetRepo
           .saveRecipe(validatedRecipe)
           .then(() => {
@@ -59,7 +71,10 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
     }
   }
 
-  private async transformRecipes(recipe: Recipe): Promise<Recipe> {
+  private async transformRecipes(
+    recipe: Recipe,
+    imageUrl: string
+  ): Promise<Recipe> {
     const validatedIngredients: Ingredient[] = [];
 
     // Validate each ingredient
@@ -92,7 +107,7 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
         recipe.steps,
         recipe.prepTime,
         recipe.totalTime,
-        recipe.imageUrl,
+        imageUrl,
         recipe.servingSize
       );
 

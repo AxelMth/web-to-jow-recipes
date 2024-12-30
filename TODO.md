@@ -1,2 +1,4 @@
 - Ajouter les photos pour les recettes
-- Oignons => ne pas utiliser Oignons nouveaux
+- Use max page argument for crawl
+- Use filters for crawl
+- Remove pepper
