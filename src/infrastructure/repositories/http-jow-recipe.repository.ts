@@ -1,14 +1,12 @@
 import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
-import { readFile, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 
 import { Recipe } from '../../domain/entities/recipe';
 import { RecipeTargetRepository } from '../../application/ports/output/recipe-target.repository';
 import { JowRecipeAdapter } from '../adapters/jow-recipe.adapter';
 import { jowRecipeSchema } from '../../presentation/schemas/jow-recipe.schema';
-import { read } from 'node:fs';
-import { exec, execSync } from 'node:child_process';
 
 export class HttpJowRecipeRepository implements RecipeTargetRepository {
   async saveRecipe(recipe: Recipe): Promise<Recipe> {
