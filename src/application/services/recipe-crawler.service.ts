@@ -35,11 +35,9 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
         console.log(`Crawling recipe ${recipe.name}...`);
         let uploadedImageUrl = '';
         if (recipe.imageUrl) {
-          console.log(`Uploading image for recipe ${recipe.name}...`);
           ({ uploadedImageUrl } = await this.targetRepo.uploadImage(
             recipe.imageUrl
           ));
-          console.log(`Image uploaded: ${uploadedImageUrl}`);
         }
         // TODO: use new function to put imageUrl
         const validatedRecipe = await this.transformRecipes(
