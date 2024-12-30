@@ -25,7 +25,9 @@ export class HttpJowIngredientRepository implements IngredientRepository {
     let ingredient = matchIngredient(name, validatedIngredients);
 
     if (!ingredient) {
-      console.warn(`No ingredient found for name ${name}`);
+      console.warn(
+        `No ingredient found for name ${name}, using first result ${validatedIngredients[0].name}`
+      );
       ingredient = validatedIngredients[0];
     }
 
@@ -38,7 +40,7 @@ export class HttpJowIngredientRepository implements IngredientRepository {
 
     if (!matchingUnit) {
       const defaultUnitKg = ingredient.displayableUnits.find(
-        du => du.label === 'kg'
+        du => du.label === 'kg' || du.label === 'L'
       );
       if (!defaultUnitKg) {
         console.warn(`No default unit found for ingredient ${ingredient.name}`);
