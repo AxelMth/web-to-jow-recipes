@@ -1,5 +1,5 @@
 import axios from 'axios';
-import Fuse, { FuseResult } from 'fuse.js';
+import { FuseResult } from 'fuse.js';
 import stringSimilarity from 'string-similarity';
 
 import { Ingredient } from '../../domain/entities/ingredient';
@@ -8,31 +8,6 @@ import { IngredientRepository } from '../../application/ports/output/ingredient.
 import { ingredientSchema } from '../../presentation/schemas/jow-ingredient.schema';
 
 export class HttpJowIngredientRepository implements IngredientRepository {
-  private static configureFuseSearch(
-    ingredients: Zod.infer<typeof ingredientSchema>[]
-  ): Fuse<any> {
-    return new Fuse(ingredients, {
-      keys: ['name'],
-      includeScore: true,
-      threshold: 0.3,
-      minMatchCharLength: 4,
-      findAllMatches: true,
-    });
-  }
-
-  private static findBestMatch(
-    searchResults: FuseResult<Zod.infer<typeof ingredientSchema>>[]
-  ): Zod.infer<typeof ingredientSchema> | null {
-    if (searchResults.length === 0) return null;
-
-    // Perfect match has score 0
-    const perfectMatch = searchResults.find(result => result.score === 0);
-    if (perfectMatch) return perfectMatch.item;
-
-    // Otherwise return the best scoring result
-    return searchResults[0].item;
-  }
-
   async findByNameAndUnit(
     name: string,
     unit: Unit
