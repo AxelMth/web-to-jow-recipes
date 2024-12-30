@@ -10,11 +10,15 @@ import { jowRecipeSchema } from '../../presentation/schemas/jow-recipe.schema';
 
 export class HttpJowRecipeRepository implements RecipeTargetRepository {
   async saveRecipe(recipe: Recipe): Promise<Recipe> {
-    await axios.post(`${process.env.JOW_URL}`, JowRecipeAdapter.toJow(recipe), {
-      headers: {
-        Authorization: `Bearer ${process.env.JOW_BEARER_TOKEN}`,
-      },
-    });
+    await axios.post(
+      `${process.env.JOW_BASE_URL}/public/recipes/uploaded`,
+      JowRecipeAdapter.toJow(recipe),
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.JOW_BEARER_TOKEN}`,
+        },
+      }
+    );
     return recipe;
   }
 
@@ -26,7 +30,7 @@ export class HttpJowRecipeRepository implements RecipeTargetRepository {
 
     while (hasMore) {
       const response = await axios.get(
-        `${process.env.JOW_URL}?start=${start}&limit=${limit}`,
+        `${process.env.JOW_BASE_URL}/public/recipes/uploaded?start=${start}&limit=${limit}`,
         {
           headers: {
             Authorization: `Bearer ${process.env.JOW_BEARER_TOKEN}`,
@@ -51,17 +55,19 @@ export class HttpJowRecipeRepository implements RecipeTargetRepository {
 
   async deleteRecipeById(id: string): Promise<void> {
     console.log(`Deleting recipe with id ${id}...`);
-    await axios.delete(`${process.env.JOW_URL}/${id}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.JOW_BEARER_TOKEN}`,
-      },
-    });
+    await axios.delete(
+      `${process.env.JOW_BASE_URL}/public/recipes/uploaded/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.JOW_BEARER_TOKEN}`,
+        },
+      }
+    );
   }
 
   async uploadImage(imageUrl: string): Promise<{ uploadedImageUrl: string }> {
-    // `https://img.hellofresh.com/c_fit,f_auto,fl_lossy,h_500,q_50,w_500/hellofresh_s3/${imageUrl}`,
     const image = await axios.get(
-      `https://img.hellofresh.com/c_fit,f_auto,fl_lossy,h_500,q_50,w_500/hellofresh_s3/${imageUrl}`,
+      `${process.env.SOURCE_IMG_BASE_URL}/${imageUrl}`,
       {
         responseType: 'arraybuffer',
       }
@@ -74,7 +80,7 @@ export class HttpJowRecipeRepository implements RecipeTargetRepository {
     let config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: 'https://api.jow.fr/public/recipes/uploaded/image',
+      url: `${process.env.JOW_BASE_URL}/public/recipes/uploaded/image`,
       headers: {
         accept: 'application/json',
         'accept-language': 'fr',
