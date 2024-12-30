@@ -21,7 +21,7 @@ export class HttpSourceRecipeRepository implements RecipeSourceRepository {
   }> {
     // resetAxiosInstance();
     const response = await axios.get(
-      `${process.env.SOURCE_URL}?country=fr&locale=fr-FR&not-author=thermomix&order=-date&product=classic-box%7Cclassic-menu%7Cclassic-plan&skip=${page - 1}&take=${itemsPerPage}`,
+      `${process.env.SOURCE_BASE_URL}/recipes/recipes/search?country=fr&locale=fr-FR&not-author=thermomix&order=-date&product=classic-box%7Cclassic-menu%7Cclassic-plan&skip=${page - 1}&take=${itemsPerPage}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.SOURCE_BEARER_TOKEN}`,
