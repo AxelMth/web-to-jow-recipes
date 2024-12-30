@@ -21,7 +21,7 @@ A Node.js application that crawls recipes from web sources and converts them to 
 ```bash
 git clone https://github.com/yourusername/web-to-jow-recipes.git
 cd web-to-jow-recipes
-npm install
+pnpm install
 ```
 
 ## Configuration
