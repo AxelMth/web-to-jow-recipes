@@ -6,6 +6,7 @@ import { RecipeCrawlerService } from './application/services/recipe-crawler.serv
 import { HttpSourceRecipeRepository } from './infrastructure/repositories/http-source-recipe.repository';
 import { HttpJowRecipeRepository } from './infrastructure/repositories/http-jow-recipe.repository';
 import { HttpJowIngredientRepository } from './infrastructure/repositories/http-jow-ingredient.repository';
+import { RecipeFilterService } from './application/services/recipe-filter.service';
 
 export class Server {
   private app = express();
@@ -27,7 +28,9 @@ export class Server {
     const sourceRepo = new HttpSourceRecipeRepository();
     const targetRepo = new HttpJowRecipeRepository();
     const ingredientsRepo = new HttpJowIngredientRepository();
+    const filterService = new RecipeFilterService();
     const crawlerService = new RecipeCrawlerService(
+      filterService,
       sourceRepo,
       targetRepo,
       ingredientsRepo

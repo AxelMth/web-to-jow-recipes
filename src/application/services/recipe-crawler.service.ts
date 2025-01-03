@@ -4,9 +4,11 @@ import { RecipeTargetRepository } from '../../application/ports/output/recipe-ta
 import { IngredientRepository } from '../../application/ports/output/ingredient.repository';
 import { Recipe } from '../../domain/entities/recipe';
 import { Ingredient } from '../../domain/entities/ingredient';
+import { RecipeFilterUseCase } from '../ports/input/recipe-filter.use-case';
 
 export class RecipeCrawlerService implements RecipeCrawlerUseCase {
   constructor(
+    private readonly recipeService: RecipeFilterUseCase,
     private readonly sourceRepo: RecipeSourceRepository,
     private readonly targetRepo: RecipeTargetRepository,
     private readonly ingredientRepo: IngredientRepository
@@ -31,7 +33,12 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
         const { recipes, pagination } =
           await this.sourceRepo.fetchPaginatedRecipes(page, itemsPerPage);
 
-        for (let recipe of recipes) {
+        const vegetarianRecipes =
+          this.recipeService.filterRecipesByIngredients(recipes);
+        const unprocessedAndVegetarianRecipes =
+          this.recipeService.filterAlreadyProcessedRecipes(vegetarianRecipes);
+
+        for (let recipe of unprocessedAndVegetarianRecipes) {
           console.log(`Crawling recipe ${recipe.name}...`);
 
           if (recipe.imageUrl) {
