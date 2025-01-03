@@ -18,7 +18,7 @@ const abbreviationSchema = z.object({
 });
 
 const unitSchema = z.object({
-  measurementSystemCompatibility: measurementSystemSchema,
+  measurementSystemCompatibility: measurementSystemSchema.optional(),
   name: z.string(),
   _id: z.string(),
   updatedAt: z.string(),

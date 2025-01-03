@@ -85,7 +85,7 @@ const yieldSchema = z.object({
     z.object({
       id: z.string(),
       amount: z.number().nullable(),
-      unit: z.string(),
+      unit: z.string().nullable(),
     })
   ),
 });
@@ -95,11 +95,11 @@ export const sourceRecipeSchema = z.object({
   active: z.boolean(),
   allergens: z.array(allergenSchema),
   averageRating: z.number(),
-  canonical: z.string(),
+  canonical: z.string().nullable(),
   canonicalLink: z.string().nullable(),
   cardLink: z.string().nullable(),
   category: z.string().nullable(),
-  clonedFrom: z.string(),
+  clonedFrom: z.string().nullable(),
   comment: z.string().nullable(),
   country: z.string(),
   createdAt: z.string(),
