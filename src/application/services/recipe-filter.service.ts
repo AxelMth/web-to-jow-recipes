@@ -1,6 +1,7 @@
 import { Recipe } from '../../domain/entities/recipe';
 import { Ingredient } from '../../domain/entities/ingredient';
 import { RecipeFilterUseCase } from '../../application/ports/input/recipe-filter.use-case';
+import { readFile, appendFile } from 'node:fs/promises';
 
 export class RecipeFilterService implements RecipeFilterUseCase {
   private readonly nonVegetarianIngredients = [
@@ -16,7 +17,6 @@ export class RecipeFilterService implements RecipeFilterUseCase {
     'bacon',
     'chipolata',
   ];
-  private readonly processedRecipes: Recipe[] = [];
 
   public filterRecipesByIngredients(recipes: Recipe[]): Recipe[] {
     const vegetarianRecipes: Recipe[] = [];
@@ -29,20 +29,28 @@ export class RecipeFilterService implements RecipeFilterUseCase {
     return vegetarianRecipes;
   }
 
-  public filterAlreadyProcessedRecipes(recipes: Recipe[]): Recipe[] {
+  public async filterAlreadyProcessedRecipes(
+    recipes: Recipe[]
+  ): Promise<Recipe[]> {
     const unprocessedRecipes: Recipe[] = [];
     for (const recipe of recipes) {
-      if (!this.isRecipeProcessed(recipe)) {
+      const isRecipeProcessed = await this.isRecipeProcessed(recipe);
+      if (!isRecipeProcessed) {
         unprocessedRecipes.push(recipe);
-        this.processedRecipes.push(recipe);
+        // TODO: Share filename in a constant
+        await appendFile('already-processed-recipes.txt', recipe.name + '\n');
       }
     }
     return unprocessedRecipes;
   }
 
-  private isRecipeProcessed(recipe: Recipe): boolean {
-    return this.processedRecipes.some(
-      processedRecipe => processedRecipe.name === recipe.name
+  private async isRecipeProcessed(recipe: Recipe): Promise<boolean> {
+    const processedRecipes = await readFile(
+      'already-processed-recipes.txt',
+      'utf-8'
+    ).then(data => data.split('\n'));
+    return processedRecipes.some(
+      processedRecipe => processedRecipe === recipe.name
     );
   }
 

@@ -5,6 +5,7 @@ import { IngredientRepository } from '../../application/ports/output/ingredient.
 import { Recipe } from '../../domain/entities/recipe';
 import { Ingredient } from '../../domain/entities/ingredient';
 import { RecipeFilterUseCase } from '../ports/input/recipe-filter.use-case';
+import { appendFile, writeFile } from 'node:fs/promises';
 
 export class RecipeCrawlerService implements RecipeCrawlerUseCase {
   constructor(
@@ -14,12 +15,12 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
     private readonly ingredientRepo: IngredientRepository
   ) {}
 
-  async crawlAndTransform(): Promise<{
+  async crawlAndTransform(page: number = 1): Promise<{
     processed: number;
     failed: number;
     errors: string[];
   }> {
-    let page = 1;
+    let currentPage = page;
     const itemsPerPage = 10;
 
     let processed = 0;
@@ -29,14 +30,19 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
     try {
       let hasNextPage = true;
       while (hasNextPage) {
-        console.log(`Fetching page ${page}...`);
+        console.log(`Fetching page ${currentPage}...`);
         const { recipes, pagination } =
-          await this.sourceRepo.fetchPaginatedRecipes(page, itemsPerPage);
+          await this.sourceRepo.fetchPaginatedRecipes(
+            currentPage,
+            itemsPerPage
+          );
 
         const vegetarianRecipes =
           this.recipeService.filterRecipesByIngredients(recipes);
         const unprocessedAndVegetarianRecipes =
-          this.recipeService.filterAlreadyProcessedRecipes(vegetarianRecipes);
+          await this.recipeService.filterAlreadyProcessedRecipes(
+            vegetarianRecipes
+          );
 
         for (let recipe of unprocessedAndVegetarianRecipes) {
           console.log(`Crawling recipe ${recipe.name}...`);
@@ -55,8 +61,8 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
           processed++;
         }
 
-        hasNextPage = pagination.totalItems > page * itemsPerPage;
-        page++;
+        hasNextPage = pagination.totalItems > currentPage * itemsPerPage;
+        currentPage++;
       }
     } catch (error: unknown) {
       console.error(error);
@@ -67,6 +73,14 @@ export class RecipeCrawlerService implements RecipeCrawlerUseCase {
     }
 
     return { processed, failed, errors };
+  }
+
+  async syncAlreadyProcessedRecipes(): Promise<void> {
+    const recipes = await this.targetRepo.getAllRecipes();
+    for (const recipe of recipes) {
+      // TODO: Share filename in a constant
+      await appendFile('already-processed-recipes.txt', recipe.name + '\n');
+    }
   }
 
   async deleteAllRecipes(): Promise<void> {

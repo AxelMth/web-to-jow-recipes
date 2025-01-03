@@ -22,7 +22,7 @@ export class SourceRecipeAdapter {
         return new Ingredient(
           ing.id,
           ing.name,
-          ing.imageLink,
+          ing.imageLink || '',
           {
             id: foundIngredient?.unit || '',
             name: foundIngredient?.unit || '',

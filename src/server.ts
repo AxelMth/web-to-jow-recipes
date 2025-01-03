@@ -45,6 +45,9 @@ export class Server {
     this.app.post('/api/recipes/crawl', (req, res) =>
       recipeController.crawlRecipes(req, res)
     );
+    this.app.post('/api/recipes/sync', (req, res) =>
+      recipeController.syncRecipes(req, res)
+    );
     this.app.delete('/api/recipes', (req, res) =>
       recipeController.deleteAllRecipes(req, res)
     );
